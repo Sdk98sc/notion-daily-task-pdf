@@ -18,7 +18,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install notion-client markdown markdown2pdf
+        pip install notion-client fpdf
 
     - name: Run script
       env:
