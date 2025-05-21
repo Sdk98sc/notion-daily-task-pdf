@@ -1,36 +1,33 @@
 import os
 from notion_client import Client
-from markdown2 import markdown
 from fpdf import FPDF
 from datetime import datetime
 
-# Setup
-notion = Client(auth=os.environ["NOTION_TOKEN"])
-database_id = os.environ["NOTION_DATABASE_ID"]
+# Get token and database ID from environment
+NOTION_TOKEN = os.environ["NOTION_TOKEN"]
+DATABASE_ID = os.environ["NOTION_DATABASE_ID"]
+
+# Set up Notion client
+notion = Client(auth=NOTION_TOKEN)
 
 # Query database
-response = notion.databases.query(database_id=database_id)
-items = response["results"]
+response = notion.databases.query(database_id=DATABASE_ID)
+results = response.get("results", [])
 
-# Build Markdown content
-content = f"# Daily Tasks – {datetime.today().strftime('%Y-%m-%d')}\n\n"
+# Prepare content
+today = datetime.today().strftime("%Y-%m-%d")
+content = f"Daily Tasks – {today}\n\n"
 
-for item in items:
-    props = item["properties"]
-    name = props.get("Name", {}).get("title", [])
-    task = name[0]["plain_text"] if name else "Untitled Task"
-    content += f"- {task}\n"
+for item in results:
+    title_prop = item["properties"].get("Name", {}).get("title", [])
+    title = title_prop[0]["plain_text"] if title_prop else "Untitled Task"
+    content += f"- {title}\n"
 
-# Save to Markdown
-with open("daily_tasks.md", "w") as f:
-    f.write(content)
-
-# Convert to PDF
+# Generate PDF
 pdf = FPDF()
 pdf.add_page()
-pdf.set_auto_page_break(auto=True, margin=15)
 pdf.set_font("Arial", size=12)
-for line in content.split("\n"):
+for line in content.strip().split("\n"):
     pdf.cell(200, 10, txt=line, ln=True)
 
 pdf.output("daily_tasks.pdf")
