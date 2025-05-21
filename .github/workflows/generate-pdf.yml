@@ -28,7 +28,7 @@ jobs:
         python generate_pdf.py
 
     - name: Upload PDF
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: DailyTasks
         path: daily_tasks.pdf
